@@ -31,52 +31,56 @@
 #include <QtQuickControls2/QtQuickControls2>
 #include <QtQml/QQmlContext>
 #include <QtQuick/QQuickView>
+#include <QtQuickControls2/QQuickStyle>
 #include <QtQml/QQmlEngine>
 #include <QtCore/QDir>
-#include <QGuiApplication>
-
 
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlComponent>
 #include <QQmlEngine>
-
-
-#include <QGuiApplication>
-#include <QQmlApplicationEngine>
 #include <QQmlContext>
-#include <QtQuickControls2/QQuickStyle>
-
 
 #include <QString>
 #include <QtGlobal>
 
-
-#include "datasource.h"
 #include "pokedexdb.h"
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication app(argc, argv);
 
+        QQmlApplicationEngine engine;
 
-//    QQuickStyle::setStyle(QStringLiteral("Material"));
+    QQuickView viewer;
 
-    QQmlApplicationEngine engine;
-
-
-    PokedexDb  *aa = new PokedexDb();
-
-//    aa->insertDefaultData();
 
     bool isEmbedded = true;
-
     engine.rootContext()->setContextProperty(QStringLiteral("isEmbedded"), isEmbedded);
 
     engine.load(QUrl(QStringLiteral("qrc:/qml/pokedex/main.qml")));
 
 
-  return app.exec();
+
+//    viewer.engine()->addImportPath(extraImportPath.arg(QGuiApplication::applicationDirPath(),
+//                                      QString::fromLatin1("qml")));
+//    QObject::connect(viewer.engine(), &QQmlEngine::quit, &viewer, &QWindow::close);
+
+    viewer.setTitle(QStringLiteral("CM Pokedex"));
+
+    PokedexDb  pokedexDb(&viewer);
+    viewer.rootContext()->setContextProperty("pokedexDb", &pokedexDb);
+
+    viewer.setSource(QUrl("qrc:/qml/pokedex/main.qml"));
+    viewer.setResizeMode(QQuickView::SizeRootObjectToView);
+    viewer.setColor(QColor("#404040"));
+    viewer.show();
+
+    return app.exec();
+
 }
+
+
+
 

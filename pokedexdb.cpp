@@ -1,12 +1,29 @@
 #include "pokedexdb.h"
+#include <QtQuick/QQuickView>
+#include <QtQuick/QQuickItem>
+#include <QtCore/QDebug>
 
-PokedexDb::PokedexDb()
+
+PokedexDb::PokedexDb(QQuickView *appViewer, QObject *parent) :
+    QObject(parent),
+    m_appViewer(appViewer),
+    m_index(-1),
+  m_variantList({
+                                           QStringList({ "1", "Bulbasaur", "64" }),
+                                           QStringList({ "2", "Ivysaur", "142" }),
+                                           QStringList({ "3", "Venusaur", "263" })
+                             })
 {
-    bool a = false;
-    a = this->createConnection();
+    this->createConnection();
 
 
 }
+
+PokedexDb::~PokedexDb(){
+
+    db.close();
+};
+
 bool PokedexDb::createConnection()
 {
 
@@ -18,20 +35,20 @@ bool PokedexDb::createConnection()
             qDebug() << "ERROR: " << db.lastError();
 
             QMessageBox::critical(nullptr, QObject::tr("Cannot open database"),
-                QObject::tr("Unable to establish a database connection.\n"
-                            "This example needs SQLite support. Please read "
-                            "the Qt SQL driver documentation for information how "
-                             "to build it.\n\n"
-                            "Click Cancel to exit."), QMessageBox::Cancel);
+                                  QObject::tr("Unable to establish a database connection.\n"
+                                              "This example needs SQLite support. Please read "
+                                              "the Qt SQL driver documentation for information how "
+                                              "to build it.\n\n"
+                                              "Click Cancel to exit."), QMessageBox::Cancel);
             return false;
         }
     }
 
-        QStringList _tb = db.tables();
+    QStringList _tb = db.tables();
     if( db.tables().size()  > 0 ){
         this->insertDefaultData();
-//        this->addPokemon(13,"teste","teste.png",54);
-//        this->deletePokemon(13);
+        //        this->addPokemon(13,"teste","teste.png",54);
+        //        this->deletePokemon(13);
     }else{
         this->deleteDefaultData();
     }
@@ -43,11 +60,11 @@ void PokedexDb::showFullDatabase (){
 
     query.prepare("select *  from pokemon; ");
     query.exec();
-//        if(!query.exec()){
-//              qWarning() << "ERROR: " << query.lastError().text();
-//        }
-//        query.prepare("SELECT name FROM people WHERE id = ?");
-//        query.addBindValue(mInputText->text().toInt());
+    //        if(!query.exec()){
+    //              qWarning() << "ERROR: " << query.lastError().text();
+    //        }
+    //        query.prepare("SELECT name FROM people WHERE id = ?");
+    //        query.addBindValue(mInputText->text().toInt());
 
 }
 void PokedexDb::deleteDefaultData (){
@@ -78,7 +95,7 @@ void PokedexDb::insertDefaultData (){
     query.exec("insert into pokemon values(011, 'Metapod', 'img/011.png', 72)");
     query.exec("insert into pokemon values(012, 'Butterfree', 'img/012.png', 198)");
 
-//https://assets.pokemon.com/assets/cms2/img/pokedex/full/009.png
+    //https://assets.pokemon.com/assets/cms2/img/pokedex/full/009.png
 
 }
 
@@ -105,11 +122,30 @@ bool PokedexDb::deletePokemon(int id_to_del)
 }
 
 
-int PokedexDb::getPokemon(int id_poke)
+QStringList PokedexDb::getPokemon(int id_poke)
 {
+    QStringList _mypoke ;
     QSqlQuery query;
-    query.prepare("select id from pokemon where id = ? ");
+    query.prepare("select id name from pokemon where id = ? ");
     query.addBindValue(id_poke);
-    return query.exec();
+    query.exec();
+    /*
+    if( query.next() ){
 
+        _mypoke.append( query.value(0).toString()) ;
+        _mypoke.append(  query.value(1).toString());
+
+    }
+    return _mypoke;*/
+QStringList tmp;
+    if( query.next() ){
+        QSqlRecord record = query.record();
+
+        for(int i=0; i < record.count(); i++)
+        {
+            tmp << record.value(i).toString();
+        }
+    }
+
+    return  tmp;
 }

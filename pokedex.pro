@@ -2,15 +2,11 @@ QT += charts qml quick sql \
     widgets
 
 HEADERS += \
-    buttonmanager.h \
     connection.h \
-    datasource.h \
     pokedexdb.h
 
 SOURCES += \
-    buttonmanager.cpp \
     main.cpp \
-    datasource.cpp \
     pokedexdb.cpp
 
 RESOURCES += \
